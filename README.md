@@ -9,7 +9,7 @@
 
 ## 📌 Demo y Recursos
 - **🌐 DApp Navegable (Live Demo):** [https://melek-eyzaguirre-dev.github.io/avalanCert-Dapps/](https://melek-eyzaguirre-dev.github.io/avalanCert-Dapps/)
-- **🎬 Video Pitch (3 min):** [![YouTube](https://img.shields.io/badge/YouTube-Video_Pitch-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/shorts/zkkPRg0_SY4)
+- **🎬 Video Pitch :** [![YouTube](https://img.shields.io/badge/YouTube-Video_Pitch-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/shorts/zkkPRg0_SY4)
 - **📁 Repositorio:** [https://github.com/melek-eyzaguirre-dev/avalanCert-Dapps](https://github.com/melek-eyzaguirre-dev/avalanCert-Dapps)
 
 ---
