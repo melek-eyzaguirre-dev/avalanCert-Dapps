@@ -46,3 +46,48 @@ AvalanCert es un protocolo basado en **Soulbound Tokens (SBT - ERC-5192)** que c
 ## 🏗️ 3. Arquitectura: On-Chain vs Off-Chain
 
 Para garantizar la privacidad (cumplimiento normativo de protección de datos personales) y la eficiencia en costos de gas, AvalanCert separa responsabilidades:
+| Capa | Componente | Información Almacenada |
+| :--- | :--- | :--- |
+| **Off-Chain / Privado** | IPFS & Base Institucional | Datos personales del alumno, documento PDF original legible, firmas visuales. |
+| **On-Chain (Avalanche)** | Smart Contract (ERC-5192) | Hash criptográfico (SHA-256) del documento, Token ID intransferible, dirección del titular, dirección de la institución emisora, estado de revocación y timestamp. |
+
+---
+
+## 🔺 4. ¿Por Qué Avalanche?
+
+1. **Subsegundo de Finalidad:** Transacciones instantáneas e irreversibles, cruciales para que la experiencia de validación de un diploma sea en tiempo real.
+2. **Costos Predecibles y Bajos (C-Chain):** Tarifas de gas mínimas que permiten a las instituciones emitir miles de certificados a una fracción de centavo de dólar por emisión.
+3. **Visión a Escala (Avalanche L1 / Subnets):** Capacidad de desplegar en etapas posteriores una **L1 soberana permisionada** para consorcios universitarios o ministerios, manteniendo soberanía sobre sus reglas de validación y tarifas de red.
+
+---
+
+## 💼 5. Hipótesis de Modelo de Negocio
+
+- **Cliente Objetivo:** Universidades, instituciones de educación superior, organismos certificadores de seguridad minera/industrial y bootcamps de tecnología.
+- **¿Quién Paga?:** La institución emisora y/o empresas de reclutamiento masivo.
+- **Propuesta de Valor:** Reducción del 90% en costos de validación de títulos, eliminación del fraude de certificados y entrega de credenciales verificables con valor internacional inmediato.
+- **Mecanismo de Cobro:**
+  - **SaaS Institucional:** Cuota mensual por la plataforma de administración y control de roles.
+  - **Pay-per-Mint (Cobro por lote):** Microtarifa por credencial emitida ($0.50 - $1.50 USD por título).
+  - **API de Verificación Masiva:** Planes para portales de empleo y plataformas de RRHH.
+
+---
+
+## 🛠️ 6. Estructura del Repositorio y Tecnologías
+
+```text
+avalanche/
+├── contracts/                        # Smart Contracts en Solidity
+│   ├── AvalanCertSBT.sol             # Contrato Core ERC-5192 con control de roles
+│   └── interfaces/
+│       └── IERC5192.sol              # Interfaz oficial del estándar Soulbound
+├── docs/                             # Documentación de negocio y materiales del pitch
+│   ├── guionPitchProyecto.docx
+│   └── investigacion.docx
+├── js/                               # Lógica frontend y Web3
+│   ├── avalancheConfig.js            # Parámetros RPC de Avalanche Fuji Testnet
+│   └── validator.js                  # Motor de generación de QR y verificación URL
+├── css/
+│   └── styles.css                    # Estilos visuales con estética Avalanche
+├── index.html                        # Interfaz interactiva de la DApp
+└── README.md
