@@ -91,3 +91,30 @@ avalanche/
 │   └── styles.css                    # Estilos visuales con estética Avalanche
 ├── index.html                        # Interfaz interactiva de la DApp
 └── README.md
+---
+
+## 7)🛠️ Herramientas Utilizadas
+
+- **Red Blockchain:** Avalanche Fuji Testnet (Chain ID `43113`).
+- **Contratos Inteligentes:** Solidity `^0.8.20`, OpenZeppelin Contracts, estándar ERC-5192 (Minimal Soulbound Token).
+- **Frontend & UI:** HTML5 semántico, Tailwind CSS, JavaScript Vanilla (ES6 Modules), QRCode.js.
+- **Entorno de Desarrollo:** Visual Studio Code, Git, GitHub Pages.
+- **Asistencia de IA:** Se utilizaron modelos de IA generativa para la optimización de código, diseño de la arquitectura modular y redacción de especificaciones técnicas.
+
+---
+
+## 8)💻 Instrucciones para Ejecución Local
+
+### 1. Clonar el repositorio
+Abre tu terminal y clona el proyecto con Git:
+```bash
+git clone [https://github.com/melek-eyzaguirre-dev/avalanCert-Dapps.git](https://github.com/melek-eyzaguirre-dev/avalanCert-Dapps.git)
+cd avalanCert-Dapps
+# 💻 Ejwcutar localmente
+# Opcion 1 node.js Sin necesidad de instalación previa de paquetes
+npx serve .
+# O alternativamente con http-server
+npx http-server . -p 8080
+# Usando Opcion 2) python -m http.server 8000
+# Usando Visual studio code Opción 3: Visual Studio Code (Live Server)
+Instala la extensión Live Server (de Ritwick Dey), haz clic derecho sobre index.html y selecciona "Open with Live Server"php -S localhost:8000.
