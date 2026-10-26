@@ -5,14 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AvalanCert | Soulbound Certificates on Avalanche</title>
   
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons CDN -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- QRCode.js para generar QR dinámicos -->
+  <link rel="stylesheet" href="css/styles.css">
+
+  <!-- Dependencias Externas Web3 y Renderizado -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
   
-  <!-- Configuración personalizada de Tailwind -->
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -43,13 +46,8 @@
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
-    
-    .avax-gradient {
-      background: linear-gradient(135deg, #E84142 0%, #FF6B6C 100%);
-    }
-    .card-glow {
-      box-shadow: 0 0 25px rgba(232, 65, 66, 0.12);
-    }
+    .avax-gradient { background: linear-gradient(135deg, #E84142 0%, #FF6B6C 100%); }
+    .card-glow { box-shadow: 0 0 25px rgba(232, 65, 66, 0.12); }
     .bg-grid {
       background-size: 30px 30px;
       background-image: 
@@ -65,10 +63,9 @@
   <header class="sticky top-0 z-50 backdrop-blur-md bg-surface-900/80 border-b border-gray-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
       
-      <!-- Logo AvalanCert -->
+      <!-- Brand Logo -->
       <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('issuer')">
         <div class="w-10 h-10 rounded-xl avax-gradient flex items-center justify-center shadow-lg shadow-avax/30">
-          <!-- Logo Avalanche simplificado SVG -->
           <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12.87 2.65a1 1 0 00-1.74 0L1.24 19.82A1 1 0 002.11 21.3h19.78a1 1 0 00.87-1.48L12.87 2.65zm-.87 4.15l5.96 11.2H6.04L12 6.8z"/>
           </svg>
@@ -81,80 +78,101 @@
         </div>
       </div>
 
-      <!-- Navigation Tabs -->
-      <nav class="hidden md:flex items-center bg-surface-800 p-1.5 rounded-xl border border-gray-800 text-sm font-medium">
-        <button id="nav-issuer" onclick="switchTab('issuer')" class="px-4 py-2 rounded-lg transition-all flex items-center gap-2 bg-avax text-white shadow-md">
+      <!-- Navigation Desktop Tabs -->
+      <nav class="hidden md:flex items-center bg-surface-800 p-1.5 rounded-xl border border-gray-800 text-sm font-medium gap-1">
+        <button id="nav-issuer" onclick="switchTab('issuer')" class="px-3.5 py-2 rounded-lg transition-all flex items-center gap-2 bg-avax text-white shadow-md">
           <i data-lucide="award" class="w-4 h-4"></i>
-          <span>Emisor Institucional</span>
+          <span>Emisor</span>
         </button>
-        <button id="nav-wallet" onclick="switchTab('wallet')" class="px-4 py-2 rounded-lg transition-all flex items-center gap-2 text-gray-400 hover:text-white">
+        <button id="nav-wallet" onclick="switchTab('wallet')" class="px-3.5 py-2 rounded-lg transition-all flex items-center gap-2 text-gray-400 hover:text-white">
           <i data-lucide="wallet" class="w-4 h-4"></i>
-          <span>Billetera Estudiante</span>
-          <span id="badge-count" class="bg-gray-800 text-avax text-xs font-mono font-bold px-1.5 py-0.5 rounded-full border border-gray-700">1</span>
+          <span>Billetera</span>
+          <span id="badge-count" class="bg-gray-800 text-avax text-xs font-mono font-bold px-1.5 py-0.5 rounded-full border border-gray-700">2</span>
         </button>
-        <button id="nav-verifier" onclick="switchTab('verifier')" class="px-4 py-2 rounded-lg transition-all flex items-center gap-2 text-gray-400 hover:text-white">
+        <button id="nav-verifier" onclick="switchTab('verifier')" class="px-3.5 py-2 rounded-lg transition-all flex items-center gap-2 text-gray-400 hover:text-white">
           <i data-lucide="shield-check" class="w-4 h-4"></i>
-          <span>Verificador Público</span>
+          <span>Verificador</span>
+        </button>
+        <button id="nav-admin" onclick="switchTab('admin')" class="px-3.5 py-2 rounded-lg transition-all flex items-center gap-2 text-gray-400 hover:text-white">
+          <i data-lucide="settings" class="w-4 h-4"></i>
+          <span>Rectoría / Admin</span>
         </button>
       </nav>
 
-      <!-- Web3 Wallet Badge -->
+      <!-- Web3 Badge y Wallet Connect -->
       <div class="flex items-center gap-3">
         <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-800 border border-gray-800 text-xs">
           <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           <span class="font-mono text-gray-300">Fuji Testnet</span>
         </div>
-        <button class="bg-surface-800 hover:bg-surface-700 text-gray-200 border border-gray-700 font-mono text-xs font-semibold px-4 py-2.5 rounded-xl flex items-center gap-2 transition">
-          <i data-lucide="user-check" class="w-4 h-4 text-avax"></i>
-          <span>0x71C...49b</span>
+        <button id="btn-connect-wallet" onclick="connectWallet()" class="bg-surface-800 hover:bg-surface-700 text-gray-200 border border-gray-700 font-mono text-xs font-semibold px-4 py-2.5 rounded-xl flex items-center gap-2 transition">
+          <i data-lucide="wallet" class="w-4 h-4 text-avax"></i>
+          <span id="wallet-btn-label">Conectar Wallet</span>
         </button>
       </div>
     </div>
 
-    <!-- Mobile Nav Bar (Bottom pinned or inline) -->
+    <!-- Mobile Navigation -->
     <div class="flex md:hidden border-t border-gray-800 bg-surface-800 p-1 justify-around text-xs">
       <button onclick="switchTab('issuer')" class="p-2 flex flex-col items-center text-avax"><i data-lucide="award" class="w-5 h-5"></i>Emisor</button>
-      <button onclick="switchTab('wallet')" class="p-2 flex flex-col items-center text-gray-400"><i data-lucide="wallet" class="w-5 h-5"></i>Mis SBTs</button>
+      <button onclick="switchTab('wallet')" class="p-2 flex flex-col items-center text-gray-400"><i data-lucide="wallet" class="w-5 h-5"></i>Billetera</button>
       <button onclick="switchTab('verifier')" class="p-2 flex flex-col items-center text-gray-400"><i data-lucide="shield-check" class="w-5 h-5"></i>Verificar</button>
+      <button onclick="switchTab('admin')" class="p-2 flex flex-col items-center text-gray-400"><i data-lucide="settings" class="w-5 h-5"></i>Admin</button>
     </div>
   </header>
 
-  <!-- ================= CONTENEDOR PRINCIPAL ================= -->
+  <!-- ================= MAIN CONTENT ================= -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full flex-grow">
 
-    <!-- ================= 1. VISTA: EMISOR ================= -->
+    <!-- 1. VISTA: EMISOR INSTITUCIONAL -->
     <section id="view-issuer" class="max-w-3xl mx-auto">
       <div class="text-center mb-8">
         <span class="text-xs uppercase font-mono tracking-widest text-avax font-semibold bg-avax/10 px-3 py-1 rounded-full border border-avax/20">Portal de Certificación</span>
         <h1 class="text-3xl sm:text-4xl font-extrabold mt-3 tracking-tight">Emisión de Certificados Soulbound</h1>
-        <p class="text-gray-400 text-sm mt-2 max-w-lg mx-auto">Acuña credenciales académicas inmutables en Avalanche. Cada certificado se vincula permanentemente a la billetera del graduado (ERC-5192 SBT).</p>
+        <p class="text-gray-400 text-sm mt-2 max-w-lg mx-auto">Acuña credenciales académicas inmutables en Avalanche. Al emitir, se computa la huella criptográfica SHA-256 y se descarga el PDF infalsificable.</p>
       </div>
 
-      <div class="bg-surface-800/90 backdrop-blur-xl border border-gray-800 rounded-3xl p-6 sm:p-8 card-glow">
+      <!-- Selector de Modo de Emisión -->
+      <div class="flex justify-center mb-6">
+        <div class="bg-surface-800 p-1 rounded-xl border border-gray-800 inline-flex text-xs font-semibold gap-1">
+          <button id="btn-mode-single" type="button" onclick="setEmissionMode('single')" class="px-3.5 py-2 rounded-lg bg-avax text-white transition">
+            Emisión Nativa
+          </button>
+          <button id="btn-mode-external" type="button" onclick="setEmissionMode('external')" class="px-3.5 py-2 rounded-lg text-gray-400 hover:text-white transition">
+            Enlace Externo (Udemy/URL)
+          </button>
+          <button id="btn-mode-batch" type="button" onclick="setEmissionMode('batch')" class="px-3.5 py-2 rounded-lg text-gray-400 hover:text-white transition">
+            Lote Masivo (CSV)
+          </button>
+        </div>
+      </div>
+
+      <!-- MODO 1: Emisión Individual Nativa -->
+      <div id="panel-single-mint" class="bg-surface-800/90 backdrop-blur-xl border border-gray-800 rounded-3xl p-6 sm:p-8 card-glow">
         <form id="mint-form" onsubmit="handleMint(event)" class="space-y-5">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
               <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Nombre Completo del Alumno</label>
               <div class="relative">
                 <i data-lucide="user" class="w-4 h-4 text-gray-500 absolute left-3.5 top-3.5"></i>
-                <input required type="text" id="student-name" placeholder="Ej: Dra. Camila Morales" class="w-full bg-surface-900 border border-gray-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-avax focus:ring-1 focus:ring-avax transition">
+                <input required type="text" id="student-name" value="Dra. Camila Morales" class="w-full bg-surface-900 border border-gray-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-avax focus:ring-1 focus:ring-avax transition">
               </div>
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Wallet o Correo del Alumno</label>
+              <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Wallet Receptora (Avalanche C-Chain)</label>
               <div class="relative">
                 <i data-lucide="hash" class="w-4 h-4 text-gray-500 absolute left-3.5 top-3.5"></i>
-                <input required type="text" id="student-wallet" placeholder="0x... o alumno@universidad.edu" class="w-full bg-surface-900 border border-gray-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-avax focus:ring-1 focus:ring-avax transition font-mono">
+                <input required type="text" id="student-wallet" value="0x71C289938e1215b2447952e46b3820256877749b" class="w-full bg-surface-900 border border-gray-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-avax focus:ring-1 focus:ring-avax transition font-mono">
               </div>
             </div>
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Nombre del Curso / Título Obtenido</label>
+            <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Nombre del Programa / Título</label>
             <div class="relative">
               <i data-lucide="book-open" class="w-4 h-4 text-gray-500 absolute left-3.5 top-3.5"></i>
-              <input required type="text" id="course-name" placeholder="Ej: Maestría en Arquitectura Smart Contracts & DeFi" class="w-full bg-surface-900 border border-gray-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-avax focus:ring-1 focus:ring-avax transition">
+              <input required type="text" id="course-name" value="Maestría en Arquitectura Smart Contracts & DeFi" class="w-full bg-surface-900 border border-gray-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-avax focus:ring-1 focus:ring-avax transition">
             </div>
           </div>
 
@@ -176,7 +194,6 @@
             </div>
           </div>
 
-          <!-- Metadatos Soulbound Token -->
           <div class="p-3.5 rounded-xl bg-avax-dark/50 border border-avax/20 flex items-center justify-between text-xs text-gray-300">
             <div class="flex items-center gap-2">
               <i data-lucide="lock" class="w-4 h-4 text-avax"></i>
@@ -185,27 +202,117 @@
             <span class="text-avax font-mono">Transferible: NO</span>
           </div>
 
-          <!-- Submit Button -->
           <button type="submit" id="btn-mint" class="w-full avax-gradient hover:opacity-95 text-white font-bold py-3.5 px-6 rounded-xl flex items-center justify-center gap-3 shadow-lg shadow-avax/30 transition-all transform active:scale-[0.99]">
             <i data-lucide="sparkles" class="w-5 h-5"></i>
-            <span id="btn-mint-text">Acuñar Certificado en Avalanche (SBT)</span>
+            <span id="btn-mint-text">Acuñar en Avalanche y Generar PDF</span>
           </button>
         </form>
       </div>
 
-      <!-- Notificación Modal de éxito tras minteo -->
+      <!-- MODO 2: Homologación de Enlaces Externos -->
+      <div id="panel-external-mint" class="hidden bg-surface-800/90 backdrop-blur-xl border border-gray-800 rounded-3xl p-6 sm:p-8 card-glow">
+        <form id="external-mint-form" onsubmit="handleExternalMint(event)" class="space-y-5">
+          <div>
+            <span class="text-xs uppercase font-mono tracking-widest text-avax font-semibold">Puente Web2 -> Web3</span>
+            <h3 class="text-lg font-bold text-white mt-1">Certificar Credencial Externa en Avalanche</h3>
+            <p class="text-xs text-gray-400 mt-1">Registra diplomas preexistentes de Udemy, Coursera o universidades vinculando su URL oficial a un Soulbound Token con hash SHA-256 inmutable.</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Nombre del Alumno</label>
+              <input required type="text" id="ext-student-name" placeholder="Ej: Lucas Valenzuela" class="w-full bg-surface-900 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-avax">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Wallet Receptora (Avalanche)</label>
+              <input required type="text" id="ext-student-wallet" placeholder="0x..." class="w-full bg-surface-900 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-avax font-mono">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Nombre del Curso / Título</label>
+            <input required type="text" id="ext-course-name" placeholder="Ej: Blockchain & Smart Contracts Specialization" class="w-full bg-surface-900 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-avax">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Enlace Oficial de la Credencial (URL)</label>
+            <div class="relative">
+              <i data-lucide="link" class="w-4 h-4 text-gray-500 absolute left-3.5 top-3.5"></i>
+              <input required type="url" id="ext-course-url" placeholder="https://www.udemy.com/certificate/UC-XXXX/ o enlace institucional" class="w-full bg-surface-900 border border-gray-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-avax font-mono">
+            </div>
+          </div>
+
+          <button type="submit" id="btn-ext-mint" class="w-full avax-gradient hover:opacity-95 text-white font-bold py-3.5 px-6 rounded-xl flex items-center justify-center gap-3 shadow-lg shadow-avax/30 transition">
+            <i data-lucide="shield-check" class="w-5 h-5"></i>
+            <span id="btn-ext-text">Homologar Enlace a Soulbound Token</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- MODO 3: Minteo Masivo (CSV) -->
+      <div id="panel-batch-mint" class="hidden bg-surface-800/90 backdrop-blur-xl border border-gray-800 rounded-3xl p-6 sm:p-8 card-glow space-y-6">
+        <div class="border-b border-gray-800 pb-4 flex items-center justify-between">
+          <div>
+            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+              <i data-lucide="file-spreadsheet" class="w-5 h-5 text-avax"></i>
+              Carga Masiva de Graduados
+            </h3>
+            <p class="text-xs text-gray-400 mt-0.5">Sube un archivo .csv con las columnas: <code class="text-avax font-mono">nombre, wallet, curso, fecha</code></p>
+          </div>
+          <button onclick="downloadCsvTemplate()" class="text-xs font-mono text-gray-400 hover:text-avax flex items-center gap-1 underline">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i> Descargar Plantilla
+          </button>
+        </div>
+
+        <div id="csv-drop-zone" onclick="document.getElementById('csv-file-input').click()" class="border-2 border-dashed border-gray-700 hover:border-avax rounded-2xl p-6 text-center cursor-pointer transition">
+          <input type="file" id="csv-file-input" accept=".csv" class="hidden" onchange="handleCsvFile(event)">
+          <div class="flex flex-col items-center pointer-events-none">
+            <i data-lucide="upload" class="w-8 h-8 text-avax mb-2"></i>
+            <p class="text-sm font-semibold text-white">Haz clic o arrastra tu archivo CSV aquí</p>
+            <p class="text-xs text-gray-400 mt-1" id="csv-file-status">Ningún archivo cargado</p>
+          </div>
+        </div>
+
+        <div id="csv-preview-container" class="hidden space-y-3">
+          <div class="flex items-center justify-between text-xs text-gray-300 font-mono">
+            <span>Registros: <strong id="csv-record-count" class="text-avax">0</strong></span>
+            <span class="text-emerald-400">Estructura validada</span>
+          </div>
+          <div class="max-h-48 overflow-y-auto border border-gray-800 rounded-xl">
+            <table class="w-full text-left text-xs font-mono">
+              <thead class="bg-surface-900 border-b border-gray-800 text-gray-400">
+                <tr>
+                  <th class="p-2.5">Nombre</th>
+                  <th class="p-2.5">Wallet</th>
+                  <th class="p-2.5">Programa</th>
+                  <th class="p-2.5">Fecha</th>
+                </tr>
+              </thead>
+              <tbody id="csv-preview-body" class="divide-y divide-gray-800 text-gray-300"></tbody>
+            </table>
+          </div>
+
+          <button id="btn-batch-execute" onclick="executeBatchMinting()" class="w-full avax-gradient hover:opacity-95 text-white font-bold py-3.5 px-6 rounded-xl flex items-center justify-center gap-3 shadow-lg shadow-avax/30 transition">
+            <i data-lucide="layers" class="w-5 h-5"></i>
+            <span id="btn-batch-text">Acuñar Lote en Avalanche y Descargar ZIP</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tarjeta Modal de Éxito -->
       <div id="mint-success-card" class="hidden mt-6 p-6 bg-surface-800 border-2 border-emerald-500/40 rounded-2xl animate-fade-in card-glow">
         <div class="flex items-start gap-4">
           <div class="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 flex-shrink-0">
             <i data-lucide="check-circle-2" class="w-7 h-7"></i>
           </div>
-          <div class="flex-grow space-y-1">
-            <h4 class="font-bold text-white text-base">¡Certificado Acuñado con Éxito en Avalanche!</h4>
-            <p class="text-xs text-gray-300">El token Soulbound fue registrado en la red Fuji Testnet con inmutabilidad garantizada.</p>
+          <div class="flex-grow space-y-2">
+            <h4 class="font-bold text-white text-base">¡Certificado Emitido y PDF Generado con Éxito!</h4>
+            <p class="text-xs text-gray-300">El archivo PDF se descargó automáticamente en tu ordenador con su hash SHA-256 anclado.</p>
             
             <div class="pt-2 font-mono text-[11px] text-gray-400 space-y-1">
               <p>Tx Hash: <span id="tx-hash-display" class="text-avax font-bold break-all">0x...</span></p>
-              <p>Token ID: <span id="token-id-display" class="text-white font-semibold">AVAX-SBT-#0000</span></p>
+              <p>Token ID: <span id="token-id-display" class="text-white font-semibold">AVAX-SBT-...</span></p>
+              <p>Hash SHA-256: <span id="doc-hash-display" class="text-emerald-400 font-semibold break-all">0x...</span></p>
             </div>
 
             <div class="pt-3 flex gap-3">
@@ -221,7 +328,7 @@
       </div>
     </section>
 
-    <!-- ================= 2. VISTA: BILLETERA DEL ESTUDIANTE ================= -->
+    <!-- 2. VISTA: BILLETERA ESTUDIANTE -->
     <section id="view-wallet" class="hidden">
       <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
         <div>
@@ -232,29 +339,42 @@
 
         <div class="bg-surface-800 border border-gray-800 px-4 py-2 rounded-xl flex items-center gap-3">
           <i data-lucide="user" class="w-4 h-4 text-avax"></i>
-          <span class="text-xs text-gray-400">Titular: <span class="font-mono text-white font-semibold">0x71C...49b</span></span>
+          <span class="text-xs text-gray-400">Titular: <span class="font-mono text-white font-semibold" id="wallet-holder-address">0x71C...49b</span></span>
         </div>
       </div>
 
-      <!-- Grid de Certificados -->
-      <div id="certificates-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Renderizado dinámicamente con JavaScript -->
-      </div>
+      <div id="certificates-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-8"></div>
     </section>
 
-    <!-- ================= 3. VISTA: VERIFICADOR PÚBLICO ================= -->
+    <!-- 3. VISTA: VERIFICADOR PÚBLICO -->
     <section id="view-verifier" class="hidden max-w-3xl mx-auto">
       <div class="text-center mb-8">
         <span class="text-xs uppercase font-mono tracking-widest text-emerald-400 font-semibold bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">Consenso Criptográfico</span>
         <h2 class="text-3xl sm:text-4xl font-extrabold mt-3 tracking-tight">Validador de Certificados On-Chain</h2>
-        <p class="text-gray-400 text-sm mt-2">Introduce el Hash de Transacción, ID del SBT o escanea el QR para verificar su autenticidad directamente en la blockchain Avalanche.</p>
+        <p class="text-gray-400 text-sm mt-2">Arrastra el documento PDF oficial emitido o busca por ID para verificar la integridad matemática y el estado del token en Avalanche.</p>
       </div>
 
-      <!-- Barra de Búsqueda -->
+      <!-- Zona Drag & Drop -->
+      <div id="drop-zone" class="border-2 border-dashed border-gray-700 hover:border-avax rounded-3xl p-8 text-center bg-surface-800/60 backdrop-blur-md cursor-pointer transition-all duration-200 mb-6 group">
+        <input type="file" id="pdf-file-input" accept="application/pdf" class="hidden">
+        <div class="flex flex-col items-center justify-center pointer-events-none">
+          <div class="w-14 h-14 rounded-2xl bg-avax/10 border border-avax/30 text-avax flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+            <i data-lucide="upload-cloud" class="w-7 h-7"></i>
+          </div>
+          <p class="text-sm font-semibold text-white">Arrastra y suelta tu certificado PDF aquí</p>
+          <p class="text-xs text-gray-400 mt-1">O haz clic para explorar archivos desde tu equipo (procesamiento local sin servidores)</p>
+        </div>
+        <div id="file-info" class="hidden mt-3 text-xs font-mono text-emerald-400 font-semibold flex items-center justify-center gap-2">
+          <i data-lucide="file-check" class="w-4 h-4"></i>
+          <span id="file-name-display">archivo.pdf</span>
+        </div>
+      </div>
+
+      <!-- Buscador Manual -->
       <div class="bg-surface-800 p-2 sm:p-3 rounded-2xl border border-gray-700/80 shadow-xl flex flex-col sm:flex-row items-center gap-2">
         <div class="relative w-full flex-grow">
           <i data-lucide="search" class="w-5 h-5 text-gray-400 absolute left-4 top-3.5"></i>
-          <input id="verify-input" type="text" placeholder="Ingresa Certificado ID (ej: AVAX-SBT-9142) o Hash..." class="w-full bg-transparent pl-12 pr-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none font-mono">
+          <input id="verify-input" type="text" placeholder="Ingresa Certificado ID (ej: AVAX-SBT-9142), Hash o SHA-256..." class="w-full bg-transparent pl-12 pr-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none font-mono">
         </div>
         <button onclick="handleVerify()" class="w-full sm:w-auto avax-gradient hover:opacity-90 text-white font-semibold px-6 py-3 rounded-xl flex items-center justify-center gap-2 transition">
           <i data-lucide="check" class="w-4 h-4"></i>
@@ -262,7 +382,6 @@
         </button>
       </div>
 
-      <!-- Atajos rápidos para probar -->
       <div class="flex items-center justify-center gap-2 mt-3 text-xs text-gray-400">
         <span>Prueba rápida:</span>
         <button onclick="fillAndVerify('AVAX-SBT-9142')" class="text-avax hover:underline font-mono">AVAX-SBT-9142</button>
@@ -270,9 +389,105 @@
         <button onclick="fillAndVerify('AVAX-SBT-4421')" class="text-avax hover:underline font-mono">AVAX-SBT-4421</button>
       </div>
 
-      <!-- Resultado de Verificación (Oculto inicialmente) -->
-      <div id="verify-result" class="hidden mt-8 transition-all">
-        <!-- Renderizado dinámico vía JS -->
+      <div id="verify-result" class="hidden mt-8 transition-all"></div>
+    </section>
+
+    <!-- 4. VISTA: PANEL ADMINISTRATIVO / RECTORÍA -->
+    <section id="view-admin" class="hidden max-w-5xl mx-auto space-y-8">
+      <div class="border-b border-gray-800 pb-5">
+        <span class="text-xs uppercase font-mono tracking-widest text-avax font-semibold bg-avax/10 px-3 py-1 rounded-full border border-avax/20">Consola de Gobierno Institucional</span>
+        <h2 class="text-3xl font-extrabold mt-3 tracking-tight">Panel de Control & Rectoría</h2>
+        <p class="text-gray-400 text-sm mt-1">Gestión de autoridades emisoras y auditoría del ciclo de vida de los certificados SBT.</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Módulo Asignación de Roles -->
+        <div class="bg-surface-800/90 border border-gray-800 rounded-3xl p-6 sm:p-7 card-glow flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-10 h-10 rounded-xl bg-avax/10 text-avax flex items-center justify-center">
+                <i data-lucide="shield-alert" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h3 class="text-base font-bold text-white">Autoridades Emisoras (ISSUER_ROLE)</h3>
+                <p class="text-xs text-gray-400">Autoriza o remueve facultades para emitir títulos oficiales.</p>
+              </div>
+            </div>
+
+            <form id="role-form" onsubmit="handleRoleAssignment(event)" class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Dirección de Wallet a Gestionar</label>
+                <input required type="text" id="target-admin-wallet" placeholder="0x..." class="w-full bg-surface-900 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-avax font-mono">
+              </div>
+
+              <div class="flex gap-3">
+                <button type="submit" name="action" value="grant" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition">
+                  <i data-lucide="user-plus" class="w-4 h-4"></i> Asignar Emisor
+                </button>
+                <button type="submit" name="action" value="revoke" class="flex-1 bg-surface-700 hover:bg-red-600 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition">
+                  <i data-lucide="user-minus" class="w-4 h-4"></i> Revocar Emisor
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-gray-800 text-[11px] font-mono text-gray-400">
+            <p>Estado del Contrato: <span class="text-emerald-400">Multi-Role Enabled</span></p>
+          </div>
+        </div>
+
+        <!-- Módulo Revocación de Certificados -->
+        <div class="bg-surface-800/90 border border-gray-800 rounded-3xl p-6 sm:p-7 card-glow flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-10 h-10 rounded-xl bg-red-500/10 text-red-400 flex items-center justify-center">
+                <i data-lucide="ban" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h3 class="text-base font-bold text-white">Anulación y Revocación On-Chain</h3>
+                <p class="text-xs text-gray-400">Invalida de inmediato un token ante fraude o error formal.</p>
+              </div>
+            </div>
+
+            <form id="revoke-form" onsubmit="handleTokenRevocation(event)" class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Token ID a Revocar</label>
+                <input required type="text" id="revoke-token-id" placeholder="Ej: AVAX-SBT-9142 o 1" class="w-full bg-surface-900 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-red-500 font-mono">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Motivo Legal / Administrativo</label>
+                <input required type="text" id="revoke-reason" placeholder="Ej: Plagio académico comprobado" class="w-full bg-surface-900 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-red-500">
+              </div>
+
+              <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-lg shadow-red-600/30">
+                <i data-lucide="alert-triangle" class="w-4 h-4"></i> Ejecutar Revocación Permanente
+              </button>
+            </form>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-gray-800 text-[11px] font-mono text-gray-400">
+            <p>Inmutabilidad: La transacción quedará grabada en el bloque de Avalanche.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla de Auditoría General -->
+      <div class="bg-surface-800 border border-gray-800 rounded-3xl p-6 sm:p-7">
+        <h3 class="text-base font-bold text-white mb-4">Registro Histórico de Auditoría</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs font-mono">
+            <thead class="border-b border-gray-700 text-gray-400">
+              <tr>
+                <th class="pb-3">Token ID</th>
+                <th class="pb-3">Titular</th>
+                <th class="pb-3">Programa</th>
+                <th class="pb-3">Estado</th>
+                <th class="pb-3">Acción Rápida</th>
+              </tr>
+            </thead>
+            <tbody id="admin-audit-table" class="divide-y divide-gray-800 text-gray-300"></tbody>
+          </table>
+        </div>
       </div>
     </section>
 
@@ -289,136 +504,282 @@
     </div>
   </footer>
 
-  <!-- ================= SCRIPT LOGIC ================= -->
+  <!-- ================= LÓGICA PRINCIPAL DE LA APLICACIÓN ================= -->
   <script>
-    // Configurar fecha de hoy en el formulario
-    document.getElementById('issue-date').value = new Date().toISOString().split('T')[0];
+    let parsedCsvData = [];
 
-    // Estado inicial con certificados de prueba
+    // Almacén de certificados preexistentes
     const certificateStore = [
       {
         id: "AVAX-SBT-9142",
         studentName: "Ing. Lucas Valenzuela",
-        studentWallet: "0x71C...49b",
+        studentWallet: "0x71C289938e1215b2447952e46b3820256877749b",
         courseName: "Especialización en Consenso Snowman & Subnets",
         issuerOrg: "Avalanche Academy Worldwide",
         issueDate: "2026-08-15",
         txHash: "0x8fa4029cecfd8b1393662281ab083c749021e847c13a02cbf79477011d87f51e",
-        blockNumber: 42819034
+        documentHash: "0x7a83bd82c3f84090b82142271295fba9830501a3cfb939f379a51d203921af3e",
+        isRevoked: false,
+        externalUrl: ""
       },
       {
         id: "AVAX-SBT-4421",
         studentName: "Dra. Camila Morales",
-        studentWallet: "0x39a...e91",
+        studentWallet: "0x71C289938e1215b2447952e46b3820256877749b",
         courseName: "Diplomado en Criptografía de Curvas Elípticas",
         issuerOrg: "Universidad Pontificia Tecnológica",
         issueDate: "2026-05-10",
         txHash: "0x12a98f4cd8301ec9014b2239ad00392098231cdeba11029487c6530182ec3401",
-        blockNumber: 41209481
+        documentHash: "0x4fe23c3488d8b92b610c12854911850123568fa0993014a1a7c37618210381f2",
+        isRevoked: false,
+        externalUrl: ""
       }
     ];
 
-    // 1. Manejo de Navegación entre Vistas
+    // Navegación Unificada
     function switchTab(tab) {
-      const views = ['issuer', 'wallet', 'verifier'];
-      views.forEach(v => {
+      ['issuer', 'wallet', 'verifier', 'admin'].forEach(v => {
         const sec = document.getElementById(`view-${v}`);
         const nav = document.getElementById(`nav-${v}`);
-        
         if (v === tab) {
-          sec.classList.remove('hidden');
-          if (nav) {
-            nav.className = "px-4 py-2 rounded-lg transition-all flex items-center gap-2 bg-avax text-white shadow-md";
-          }
+          if (sec) sec.classList.remove('hidden');
+          if (nav) nav.className = "px-3.5 py-2 rounded-lg transition-all flex items-center gap-2 bg-avax text-white shadow-md";
         } else {
-          sec.classList.add('hidden');
-          if (nav) {
-            nav.className = "px-4 py-2 rounded-lg transition-all flex items-center gap-2 text-gray-400 hover:text-white";
-          }
+          if (sec) sec.classList.add('hidden');
+          if (nav) nav.className = "px-3.5 py-2 rounded-lg transition-all flex items-center gap-2 text-gray-400 hover:text-white";
         }
       });
 
-      if (tab === 'wallet') {
-        renderWalletCertificates();
-      }
+      if (tab === 'wallet') renderWalletCertificates();
+      if (tab === 'admin') renderAdminAuditTable();
       lucide.createIcons();
     }
 
-    // 2. Acuñar Certificado (Simulación rápida <1 seg)
-    function handleMint(e) {
-      e.preventDefault();
-      
-      const btn = document.getElementById('btn-mint');
-      const btnText = document.getElementById('btn-mint-text');
-      
-      // Estado de carga rápido (< 1 seg)
-      btn.disabled = true;
-      btn.classList.add('opacity-80', 'cursor-not-allowed');
-      btnText.innerHTML = `
-        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        Validando en Fuji Testnet (Consenso Snow)...
-      `;
+    // Selector de Modo de Emisión
+    function setEmissionMode(mode) {
+      document.getElementById('panel-single-mint').classList.toggle('hidden', mode !== 'single');
+      document.getElementById('panel-external-mint').classList.toggle('hidden', mode !== 'external');
+      document.getElementById('panel-batch-mint').classList.toggle('hidden', mode !== 'batch');
 
-      setTimeout(() => {
-        // Generar IDs simulados
-        const randomHex = Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join('');
-        const fakeTx = `0x${randomHex}`;
-        const newId = `AVAX-SBT-${Math.floor(1000 + Math.random() * 9000)}`;
-        const blockNum = Math.floor(43000000 + Math.random() * 99999);
-
-        const newCert = {
-          id: newId,
-          studentName: document.getElementById('student-name').value,
-          studentWallet: document.getElementById('student-wallet').value,
-          courseName: document.getElementById('course-name').value,
-          issuerOrg: document.getElementById('issuer-org').value,
-          issueDate: document.getElementById('issue-date').value,
-          txHash: fakeTx,
-          blockNumber: blockNum
-        };
-
-        // Guardar al inicio
-        certificateStore.unshift(newCert);
-
-        // Actualizar UI
-        document.getElementById('tx-hash-display').innerText = fakeTx;
-        document.getElementById('token-id-display').innerText = newId;
-        document.getElementById('mint-success-card').classList.remove('hidden');
-        document.getElementById('badge-count').innerText = certificateStore.length;
-
-        // Reset botón
-        btn.disabled = false;
-        btn.classList.remove('opacity-80', 'cursor-not-allowed');
-        btnText.innerText = 'Acuñar Certificado en Avalanche (SBT)';
-
-        // Scroll hacia el mensaje
-        document.getElementById('mint-success-card').scrollIntoView({ behavior: 'smooth' });
-        lucide.createIcons();
-      }, 700);
+      ['single', 'external', 'batch'].forEach(m => {
+        const btn = document.getElementById(`btn-mode-${m}`);
+        if (btn) {
+          btn.className = m === mode
+            ? "px-3.5 py-2 rounded-lg bg-avax text-white transition"
+            : "px-3.5 py-2 rounded-lg text-gray-400 hover:text-white transition";
+        }
+      });
+      lucide.createIcons();
     }
 
-    // 3. Renderizar certificados en la billetera
+    // Plantilla CSV
+    function downloadCsvTemplate() {
+      const csvContent = "data:text/csv;charset=utf-8," 
+        + "nombre,wallet,curso,fecha\n"
+        + "Elena Rostova,0x71C289938e1215b2447952e46b3820256877749b,Arquitectura Avalanche Subnets,2026-11-01\n"
+        + "Carlos Mendez,0x39a38f4cd8301ec9014b2239ad00392098231cde,Especialista DeFi & Lending,2026-11-01";
+      const link = document.createElement("a");
+      link.href = encodeURI(csvContent);
+      link.download = "plantilla_graduados.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Parseo CSV con PapaParse
+    function handleCsvFile(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+          parsedCsvData = results.data.filter(row => row.nombre && row.wallet);
+          document.getElementById('csv-file-status').innerText = `${file.name} (${parsedCsvData.length} registros válidos)`;
+          document.getElementById('csv-record-count').innerText = parsedCsvData.length;
+
+          const tbody = document.getElementById('csv-preview-body');
+          tbody.innerHTML = '';
+          parsedCsvData.forEach(r => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td class="p-2.5 text-white">${r.nombre}</td>
+              <td class="p-2.5 truncate max-w-[120px] text-gray-400 font-mono">${r.wallet}</td>
+              <td class="p-2.5 text-gray-300">${r.curso}</td>
+              <td class="p-2.5 text-gray-400">${r.fecha || 'N/A'}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+
+          document.getElementById('csv-preview-container').classList.remove('hidden');
+        }
+      });
+    }
+
+    // Ejecutar Minteo Masivo
+    async function executeBatchMinting() {
+      if (parsedCsvData.length === 0) {
+        alert("Por favor carga un archivo CSV con registros válidos.");
+        return;
+      }
+
+      const btn = document.getElementById('btn-batch-execute');
+      const btnText = document.getElementById('btn-batch-text');
+      btn.disabled = true;
+      btn.classList.add('opacity-80', 'cursor-not-allowed');
+
+      try {
+        const res = await window.processBatchIssuance(
+          parsedCsvData, 
+          "Universidad Tecnológica Avalanche",
+          (status) => { btnText.innerText = status; }
+        );
+
+        parsedCsvData.forEach((s, idx) => {
+          certificateStore.unshift({
+            id: `AVAX-SBT-${9500 + idx}`,
+            studentName: s.nombre,
+            studentWallet: s.wallet,
+            courseName: s.curso,
+            issuerOrg: "Universidad Tecnológica Avalanche",
+            issueDate: s.fecha || '2026-11-01',
+            txHash: res.txHash,
+            documentHash: "Anclado en ZIP por Lote",
+            isRevoked: false,
+            externalUrl: ""
+          });
+        });
+
+        alert(`¡Éxito! Se acuñaron ${res.totalMinted} credenciales Soulbound en Avalanche.\nTx Hash: ${res.txHash}\nSe descargó el paquete ZIP con los diplomas.`);
+        document.getElementById('csv-preview-container').classList.add('hidden');
+        document.getElementById('csv-file-status').innerText = 'Ningún archivo cargado';
+        document.getElementById('badge-count').innerText = certificateStore.length;
+        parsedCsvData = [];
+      } catch (err) {
+        console.error(err);
+        alert("Error al procesar el minteo masivo.");
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('opacity-80', 'cursor-not-allowed');
+        btnText.innerText = 'Acuñar Lote en Avalanche y Descargar ZIP';
+      }
+    }
+
+    // Emisión Individual Nativa
+    async function handleMint(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-mint');
+      const btnText = document.getElementById('btn-mint-text');
+
+      btn.disabled = true;
+      btn.classList.add('opacity-80', 'cursor-not-allowed');
+      btnText.innerText = "Computando SHA-256 y Anclando en Avalanche...";
+
+      try {
+        const studentData = {
+          studentName: document.getElementById('student-name').value,
+          courseName: document.getElementById('course-name').value,
+          issuerOrg: document.getElementById('issuer-org').value,
+          issueDate: document.getElementById('issue-date').value
+        };
+        const recipientWallet = document.getElementById('student-wallet').value;
+
+        const res = await window.generateAndIssueCertificate(studentData, recipientWallet);
+
+        certificateStore.unshift({
+          id: res.tokenId,
+          studentName: studentData.studentName,
+          studentWallet: recipientWallet,
+          courseName: studentData.courseName,
+          issuerOrg: studentData.issuerOrg,
+          issueDate: studentData.issueDate,
+          txHash: res.txHash,
+          documentHash: res.documentHash,
+          isRevoked: false,
+          externalUrl: ""
+        });
+
+        document.getElementById('tx-hash-display').innerText = res.txHash;
+        document.getElementById('token-id-display').innerText = res.tokenId;
+        document.getElementById('doc-hash-display').innerText = res.documentHash;
+        document.getElementById('mint-success-card').classList.remove('hidden');
+        document.getElementById('badge-count').innerText = certificateStore.length;
+        document.getElementById('mint-success-card').scrollIntoView({ behavior: 'smooth' });
+      } catch (err) {
+        console.error(err);
+        alert("Error en la emisión del certificado.");
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('opacity-80', 'cursor-not-allowed');
+        btnText.innerText = 'Acuñar en Avalanche y Generar PDF';
+        lucide.createIcons();
+      }
+    }
+
+    // Homologación de Enlaces Externos
+    async function handleExternalMint(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-ext-mint');
+      const btnText = document.getElementById('btn-ext-text');
+
+      btn.disabled = true;
+      btn.classList.add('opacity-80', 'cursor-not-allowed');
+      btnText.innerText = "Computando Hash de Enlace y Anclando...";
+
+      try {
+        const studentData = {
+          studentName: document.getElementById('ext-student-name').value,
+          courseName: document.getElementById('ext-course-name').value,
+          issuerOrg: "Homologación Externa AvalanCert",
+          issueDate: new Date().toISOString().split('T')[0]
+        };
+        const recipientWallet = document.getElementById('ext-student-wallet').value;
+        const externalUrl = document.getElementById('ext-course-url').value;
+
+        const res = await window.certifyExternalLink(studentData, recipientWallet, externalUrl);
+
+        certificateStore.unshift({
+          id: res.tokenId,
+          studentName: studentData.studentName,
+          studentWallet: recipientWallet,
+          courseName: studentData.courseName,
+          issuerOrg: studentData.issuerOrg,
+          issueDate: studentData.issueDate,
+          txHash: res.txHash,
+          documentHash: res.documentHash,
+          externalUrl: res.externalUrl,
+          isRevoked: false
+        });
+
+        document.getElementById('tx-hash-display').innerText = res.txHash;
+        document.getElementById('token-id-display').innerText = res.tokenId;
+        document.getElementById('doc-hash-display').innerText = res.documentHash;
+        document.getElementById('mint-success-card').classList.remove('hidden');
+        document.getElementById('badge-count').innerText = certificateStore.length;
+        document.getElementById('external-mint-form').reset();
+        document.getElementById('mint-success-card').scrollIntoView({ behavior: 'smooth' });
+      } catch (err) {
+        console.error(err);
+        alert("Error al homologar enlace: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('opacity-80', 'cursor-not-allowed');
+        btnText.innerText = 'Homologar Enlace a Soulbound Token';
+        lucide.createIcons();
+      }
+    }
+
+    // Render de la Billetera del Estudiante
     function renderWalletCertificates() {
       const container = document.getElementById('certificates-grid');
       container.innerHTML = '';
 
-      certificateStore.forEach((cert, idx) => {
+      certificateStore.forEach(cert => {
         const qrContainerId = `qrcode-${cert.id}`;
-        
         const card = document.createElement('div');
         card.className = "relative bg-gradient-to-br from-surface-800 to-surface-700/70 border border-gray-700/80 rounded-3xl p-6 sm:p-7 shadow-xl card-glow overflow-hidden flex flex-col justify-between";
         card.innerHTML = `
-          <!-- Marca de agua decorativa Avalanche -->
-          <div class="absolute -right-12 -bottom-12 opacity-5 pointer-events-none">
-            <svg class="w-64 h-64 text-white" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12.87 2.65a1 1 0 00-1.74 0L1.24 19.82A1 1 0 002.11 21.3h19.78a1 1 0 00.87-1.48L12.87 2.65z"/>
-            </svg>
-          </div>
-
-          <!-- Header Certificado -->
           <div class="flex items-start justify-between border-b border-gray-700/60 pb-5">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-xl bg-avax/10 border border-avax/30 flex items-center justify-center">
@@ -431,117 +792,153 @@
                 <p class="text-xs text-avax font-mono font-bold">${cert.id}</p>
               </div>
             </div>
-            
-            <!-- Etiqueta Soulbound Token -->
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider bg-avax/15 border border-avax/30 text-white font-semibold">
-              <i data-lucide="lock" class="w-3 h-3 text-avax"></i>
-              Soulbound Token • Intransferible
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider ${cert.isRevoked ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-avax/15 border border-avax/30 text-white font-semibold'}">
+              <i data-lucide="${cert.isRevoked ? 'ban' : 'lock'}" class="w-3 h-3 text-avax"></i>
+              ${cert.isRevoked ? 'REVOCADO' : 'Soulbound SBT'}
             </span>
           </div>
 
-          <!-- Cuerpo: Alumno & Título -->
-          <div class="my-6 space-y-3">
-            <span class="text-xs text-gray-400 font-medium">Otorga el presente título y reconocimiento a:</span>
-            <h3 class="text-2xl font-black text-white tracking-tight">${cert.studentName}</h3>
+          <div class="my-5 space-y-2">
+            <span class="text-xs text-gray-400 font-medium">Otorgado a:</span>
+            <h3 class="text-xl font-black text-white tracking-tight">${cert.studentName}</h3>
             <p class="text-sm font-semibold text-gray-300 leading-snug">${cert.courseName}</p>
+            ${cert.externalUrl ? `
+              <p class="text-xs font-mono text-avax truncate">
+                <a href="${cert.externalUrl}" target="_blank" class="hover:underline flex items-center gap-1">
+                  <i data-lucide="external-link" class="w-3 h-3 inline"></i> Enlace Original
+                </a>
+              </p>
+            ` : ''}
           </div>
 
-          <!-- Footer: QR Dinámico y Datos Técnicos -->
           <div class="pt-4 border-t border-gray-700/60 flex items-center justify-between gap-4">
             <div class="space-y-1 text-[11px] font-mono text-gray-400">
-              <p>Fecha de Emisión: <span class="text-gray-200">${cert.issueDate}</span></p>
-              <p>Wallet Destino: <span class="text-gray-200">${cert.studentWallet}</span></p>
-              <p class="text-[10px] truncate max-w-[200px] sm:max-w-xs text-gray-500">Tx: ${cert.txHash}</p>
+              <p>Fecha: <span class="text-gray-200">${cert.issueDate}</span></p>
+              <p class="truncate max-w-[180px]">Tx: ${cert.txHash}</p>
+              <button onclick="downloadStudentCertificate('${cert.id}')" class="mt-2 text-xs bg-surface-900 border border-avax/40 hover:bg-avax hover:text-white text-avax font-medium px-3 py-1.5 rounded-lg transition flex items-center gap-1.5">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i> Descargar PDF Oficial
+              </button>
             </div>
-
-            <!-- Código QR generado en vivo -->
             <div class="bg-white p-2 rounded-xl shadow-md flex-shrink-0" id="${qrContainerId}"></div>
           </div>
         `;
-
         container.appendChild(card);
 
-        // Generar QR dinámico apuntando al ID del certificado
         setTimeout(() => {
-          new QRCode(document.getElementById(qrContainerId), {
-            text: `https://avalancert.network/verify?id=${cert.id}`,
-            width: 64,
-            height: 64,
-            colorDark : "#0B0E14",
-            colorLight : "#ffffff",
-            correctLevel : QRCode.CorrectLevel.M
-          });
+          const el = document.getElementById(qrContainerId);
+          if (el) {
+            el.innerHTML = '';
+            new QRCode(el, {
+              text: `${window.location.origin}${window.location.pathname}?token=${cert.id}`,
+              width: 64,
+              height: 64,
+              colorDark: "#0B0E14",
+              colorLight: "#ffffff",
+              correctLevel: QRCode.CorrectLevel.M
+            });
+          }
         }, 50);
       });
-
-      document.getElementById('badge-count').innerText = certificateStore.length;
+      lucide.createIcons();
     }
 
-    // 4. Verificador de Certificados
-    function handleVerify() {
-      const query = document.getElementById('verify-input').value.trim().toLowerCase();
-      const resultDiv = document.getElementById('verify-result');
+    async function downloadStudentCertificate(id) {
+      const cert = certificateStore.find(c => c.id === id);
+      if (cert) {
+        if (cert.externalUrl) {
+          await window.certifyExternalLink(
+            {
+              studentName: cert.studentName,
+              courseName: cert.courseName,
+              issuerOrg: cert.issuerOrg,
+              issueDate: cert.issueDate
+            },
+            cert.studentWallet,
+            cert.externalUrl
+          );
+        } else {
+          await window.generateAndIssueCertificate(
+            {
+              studentName: cert.studentName,
+              courseName: cert.courseName,
+              issuerOrg: cert.issuerOrg,
+              issueDate: cert.issueDate
+            },
+            cert.studentWallet
+          );
+        }
+      }
+    }
 
+    // Verificador Manual por Input
+    async function handleVerify() {
+      const query = document.getElementById('verify-input').value.trim();
+      const resultDiv = document.getElementById('verify-result');
       if (!query) {
-        alert("Por favor ingresa un ID de certificado o Hash.");
+        alert("Por favor ingresa un Token ID, Hash o digest SHA-256.");
         return;
       }
 
-      // Buscar coincidencia en store
-      const match = certificateStore.find(c => 
-        c.id.toLowerCase() === query || 
-        c.txHash.toLowerCase() === query ||
-        c.studentName.toLowerCase().includes(query)
-      );
+      const res = await window.verifyCertificateOnChain(query, certificateStore);
+      displayVerificationOutcome(res, resultDiv, query);
+    }
 
+    function fillAndVerify(id) {
+      document.getElementById('verify-input').value = id;
+      handleVerify();
+    }
+
+    // Render de Resultados de Verificación
+    function displayVerificationOutcome(res, resultDiv, rawQuery) {
       resultDiv.classList.remove('hidden');
 
-      if (match) {
+      if (res && res.found) {
+        const isRevoked = res.isRevoked;
         resultDiv.innerHTML = `
-          <div class="bg-surface-800 border-2 border-emerald-500/50 rounded-3xl p-6 sm:p-8 card-glow shadow-2xl animate-fade-in relative overflow-hidden">
-            <!-- Insignia Superior -->
+          <div class="bg-surface-800 border-2 ${isRevoked ? 'border-red-500/50' : 'border-emerald-500/50'} rounded-3xl p-6 sm:p-8 card-glow shadow-2xl animate-fade-in relative overflow-hidden">
             <div class="flex items-center justify-between pb-6 border-b border-gray-800">
               <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-                  <i data-lucide="badge-check" class="w-7 h-7"></i>
+                <div class="w-12 h-12 rounded-2xl ${isRevoked ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'} flex items-center justify-center">
+                  <i data-lucide="${isRevoked ? 'alert-triangle' : 'badge-check'}" class="w-7 h-7"></i>
                 </div>
                 <div>
-                  <span class="text-xs font-mono uppercase tracking-wider text-emerald-400 font-bold">Estado del Consenso: Verificado</span>
-                  <h3 class="text-xl font-extrabold text-white">Certificado Auténtico en Avalanche</h3>
+                  <span class="text-xs font-mono uppercase tracking-wider ${isRevoked ? 'text-red-400' : 'text-emerald-400'} font-bold">
+                    ${isRevoked ? 'Estado: Revocado' : 'Estado: Verificado y Legítimo'}
+                  </span>
+                  <h3 class="text-xl font-extrabold text-white">${isRevoked ? 'Certificado Anulado' : 'Certificado Auténtico en Avalanche'}</h3>
                 </div>
               </div>
-              <span class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                <i data-lucide="shield" class="w-3.5 h-3.5"></i> Bloque #${match.blockNumber}
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono ${isRevoked ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}">
+                <i data-lucide="${isRevoked ? 'ban' : 'shield'}" class="w-3.5 h-3.5"></i> ${res.id}
               </span>
             </div>
 
-            <!-- Datos del Certificado Encontrado -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 my-6 text-sm">
               <div>
-                <span class="text-xs text-gray-400 uppercase font-mono">Estudiante Acreditado</span>
-                <p class="font-bold text-white text-base mt-0.5">${match.studentName}</p>
-                <p class="text-xs font-mono text-gray-400">${match.studentWallet}</p>
+                <span class="text-xs text-gray-400 uppercase font-mono">Estudiante</span>
+                <p class="font-bold text-white text-base mt-0.5">${res.studentName || 'Titular Verificado'}</p>
+                <p class="text-xs font-mono text-gray-400 truncate">${res.studentWallet}</p>
               </div>
-
               <div>
-                <span class="text-xs text-gray-400 uppercase font-mono">Institución Emisora Verificada</span>
-                <p class="font-bold text-white text-base mt-0.5 flex items-center gap-1.5">
-                  ${match.issuerOrg}
-                  <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
-                </p>
-                <p class="text-xs text-gray-400">Avalanche Verified Issuer Node</p>
+                <span class="text-xs text-gray-400 uppercase font-mono">Emisor Oficial</span>
+                <p class="font-bold text-white text-base mt-0.5">${res.issuerOrg}</p>
+                <p class="text-xs text-gray-400">Origen: ${res.source}</p>
               </div>
-
               <div class="sm:col-span-2 bg-surface-900/80 p-4 rounded-xl border border-gray-800">
-                <span class="text-xs text-gray-400 uppercase font-mono">Grado / Programa Completado</span>
-                <p class="font-semibold text-white text-base mt-0.5">${match.courseName}</p>
+                <span class="text-xs text-gray-400 uppercase font-mono">Programa Completado</span>
+                <p class="font-semibold text-white text-base mt-0.5">${res.courseName || 'Programa Acreditado'}</p>
+                ${res.externalUrl ? `
+                  <div class="mt-2 text-xs font-mono">
+                    <span class="text-gray-400">URL Homologada: </span>
+                    <a href="${res.externalUrl}" target="_blank" class="text-avax hover:underline break-all">${res.externalUrl}</a>
+                  </div>
+                ` : ''}
               </div>
             </div>
 
-            <!-- Pie de Metadatos Criptográficos -->
-            <div class="pt-4 border-t border-gray-800 flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs font-mono text-gray-400 gap-2">
-              <div>Fecha Emisión: <span class="text-white font-medium">${match.issueDate}</span></div>
-              <div class="truncate max-w-full sm:max-w-md">Tx: <a href="#" class="text-avax hover:underline">${match.txHash}</a></div>
+            <div class="pt-4 border-t border-gray-800 text-xs font-mono text-gray-400 space-y-1">
+              <div>Fecha Emisión: <span class="text-white">${res.issueDate}</span></div>
+              <div class="truncate">Digest SHA-256: <span class="${isRevoked ? 'text-red-400' : 'text-emerald-400'} font-bold">${res.documentHash || 'Validado on-chain'}</span></div>
             </div>
           </div>
         `;
@@ -549,27 +946,165 @@
         resultDiv.innerHTML = `
           <div class="bg-surface-800 border-2 border-red-500/40 rounded-3xl p-6 sm:p-8 text-center animate-fade-in">
             <div class="w-12 h-12 rounded-2xl bg-red-500/20 text-red-400 mx-auto flex items-center justify-center mb-3">
-              <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+              <i data-lucide="alert-octagon" class="w-6 h-6"></i>
             </div>
-            <h3 class="text-lg font-bold text-white">Certificado No Encontrado</h3>
-            <p class="text-xs text-gray-400 mt-1 max-w-md mx-auto">No existe ningún Soulbound Token registrado con ese ID o transacción en la Avalanche Fuji C-Chain.</p>
+            <h3 class="text-lg font-bold text-white">Certificado No Encontrado o Adulterado</h3>
+            <p class="text-xs text-gray-400 mt-1 max-w-md mx-auto">No existe ningún registro que coincida con el identificador o hash computado (${rawQuery.substring(0, 16)}...).</p>
           </div>
         `;
       }
-
       lucide.createIcons();
     }
 
-    // Función auxiliar para los botones de prueba rápida
-    function fillAndVerify(id) {
-      document.getElementById('verify-input').value = id;
-      handleVerify();
+    // Drag and Drop para PDF
+    async function processUploadedPDF(file) {
+      document.getElementById("file-info").classList.remove("hidden");
+      document.getElementById("file-name-display").innerText = file.name;
+      const resultDiv = document.getElementById("verify-result");
+
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const fileHash = await window.calculateSHA256(arrayBuffer);
+        const res = await window.verifyCertificateOnChain(fileHash, certificateStore);
+        displayVerificationOutcome(res, resultDiv, fileHash);
+      } catch (err) {
+        console.error(err);
+        alert("Error al procesar el archivo PDF.");
+      }
     }
 
-    // Inicializar íconos al cargar la página
+    // Panel Rectoría: Roles y Revocación
+    function renderAdminAuditTable() {
+      const tbody = document.getElementById('admin-audit-table');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      certificateStore.forEach(cert => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-surface-700/50 transition";
+        tr.innerHTML = `
+          <td class="py-3 font-bold ${cert.isRevoked ? 'line-through text-red-400' : 'text-white'}">${cert.id}</td>
+          <td class="py-3 truncate max-w-[150px]">${cert.studentName}</td>
+          <td class="py-3 truncate max-w-[200px]">${cert.courseName}</td>
+          <td class="py-3">
+            <span class="px-2 py-0.5 rounded text-[10px] font-semibold ${cert.isRevoked ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400'}">
+              ${cert.isRevoked ? 'REVOCADO' : 'VIGENTE'}
+            </span>
+          </td>
+          <td class="py-3">
+            ${!cert.isRevoked ? `
+              <button onclick="quickRevoke('${cert.id}')" class="text-red-400 hover:underline hover:text-red-300 font-semibold">
+                Anular
+              </button>
+            ` : '<span class="text-gray-500">Sin acción</span>'}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      lucide.createIcons();
+    }
+
+    async function handleRoleAssignment(e) {
+      e.preventDefault();
+      const wallet = document.getElementById('target-admin-wallet').value.trim();
+      const action = e.submitter.value;
+      const res = await window.manageIssuerRole(wallet, action);
+      alert(res.message);
+      document.getElementById('role-form').reset();
+    }
+
+    async function handleTokenRevocation(e) {
+      e.preventDefault();
+      const tokenId = document.getElementById('revoke-token-id').value.trim();
+      const reason = document.getElementById('revoke-reason').value.trim();
+      await executeRevoke(tokenId, reason);
+    }
+
+    async function quickRevoke(tokenId) {
+      const reason = prompt(`Indica el motivo de revocación para ${tokenId}:`, "Plagio o fraude comprobado");
+      if (reason) await executeRevoke(tokenId, reason);
+    }
+
+    async function executeRevoke(tokenId, reason) {
+      const res = await window.revokeCertificateOnChain(tokenId, reason);
+      const item = certificateStore.find(c => c.id.toLowerCase() === tokenId.toLowerCase());
+      if (item) item.isRevoked = true;
+
+      alert(`Certificado ${tokenId} revocado exitosamente.\nTx: ${res.txHash}`);
+      document.getElementById('revoke-form').reset();
+      renderAdminAuditTable();
+    }
+
+    // Conexión Web3 MetaMask / Core
+    async function connectWallet() {
+      if (window.ethereum) {
+        try {
+          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+          const acc = accounts[0];
+          document.getElementById('wallet-btn-label').innerText = `${acc.substring(0, 6)}...${acc.substring(acc.length - 4)}`;
+          document.getElementById('wallet-holder-address').innerText = acc;
+        } catch (err) {
+          console.error("Conexión rechazada", err);
+        }
+      } else {
+        alert("Instala MetaMask o Core Wallet para interactuar en directo con Avalanche.");
+      }
+    }
+
+    // Inicializador al cargar el DOM
     document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById('issue-date').value = new Date().toISOString().split('T')[0];
       lucide.createIcons();
+
+      // Listeners Drag and Drop PDF
+      const dropZone = document.getElementById("drop-zone");
+      const fileInput = document.getElementById("pdf-file-input");
+
+      if (dropZone && fileInput) {
+        dropZone.addEventListener("click", () => fileInput.click());
+        fileInput.addEventListener("change", (e) => {
+          if (e.target.files.length > 0) processUploadedPDF(e.target.files[0]);
+        });
+
+        ['dragenter', 'dragover'].forEach(n => {
+          dropZone.addEventListener(n, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.add("border-avax", "bg-avax/5");
+          });
+        });
+
+        ['dragleave', 'drop'].forEach(n => {
+          dropZone.addEventListener(n, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.remove("border-avax", "bg-avax/5");
+          });
+        });
+
+        dropZone.addEventListener("drop", (e) => {
+          const files = e.dataTransfer.files;
+          if (files.length > 0 && files[0].type === "application/pdf") {
+            processUploadedPDF(files[0]);
+          } else {
+            alert("Por favor sube un archivo PDF válido.");
+          }
+        });
+      }
+
+      // Autoverificación por parámetros en URL del QR (?token=...)
+      const urlParams = new URLSearchParams(window.location.search);
+      const tokenParam = urlParams.get('token') || urlParams.get('verifyId');
+      if (tokenParam) {
+        switchTab('verifier');
+        document.getElementById('verify-input').value = tokenParam;
+        handleVerify();
+      }
     });
   </script>
+
+  <!-- Módulos Lógica Web3 -->
+  <script type="module" src="js/avalancheConfig.js"></script>
+  <script type="module" src="js/validator.js"></script>
 </body>
 </html>

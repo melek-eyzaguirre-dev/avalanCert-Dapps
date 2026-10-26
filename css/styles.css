@@ -1,0 +1,71 @@
+/* ==========================================================================
+   AvalanCert Custom Layer - Complementario a Tailwind CSS
+   ========================================================================== */
+
+:root {
+  --avax-red: #e84142;
+  --avax-red-glow: rgba(232, 65, 66, 0.35);
+  --avax-dark-bg: #0f1115;
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #11141b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2a2f3d;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--avax-red);
+}
+
+/* Efectos de brillo temáticos Avalanche */
+.glow-avax {
+  box-shadow: 0 0 20px var(--avax-red-glow);
+}
+
+.text-gradient-avax {
+  background: linear-gradient(135deg, #ffffff 30%, #e84142 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Contenedor del código QR generado dinámicamente */
+#qrCodeContainer {
+  background-color: #ffffff;
+  padding: 12px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#qrCodeContainer img,
+#qrCodeContainer canvas {
+  margin: 0 auto;
+  display: block;
+}
+
+/* Animación sutil de pulso para badges de estado */
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scale(0.98);
+  }
+}
+
+.badge-pulse {
+  animation: pulseGlow 2.5s infinite ease-in-out;
+}
