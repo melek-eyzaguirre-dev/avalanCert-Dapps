@@ -1,24 +1,36 @@
-# 🔺 AvalanCert Protocol (EIP-5192 Soulbound Credentials on Avalanche)
+# 🔺 AvalanCert Protocol — Decentralized Soulbound Credentials on Avalanche
 
-> **Infraestructura descentralizada para la emisión de credenciales académicas inmutables, homologación de certificados externos y verificación pública instantánea sobre Avalanche C-Chain.**
+> **Infraestructura descentralizada de grado institucional para la emisión de credenciales académicas inmutables (EIP-5192 SBT), homologación de certificados Web2 a Web3 y verificación pública instantánea Zero-Wallet sobre Avalanche C-Chain.**
 
-[![Avalanche Fuji](https://img.shields.io/badge/Network-Avalanche_Fuji_Testnet-E84142?logo=avalanche&logoColor=white)](https://testnet.snowtrace.io/)
-[![Standard](https://img.shields.io/badge/EIP-5192_Soulbound_Token-blue)](https://eips.ethereum.org/EIPS/eip-5192)
-[![Solidity](https://img.shields.io/badge/Solidity-0.8.20-363636?logo=solidity)](https://soliditylang.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Avalanche Fuji](https://img.shields.io/badge/Network-Avalanche_Fuji_Testnet-E84142?style=for-the-badge&logo=avalanche&logoColor=white)](https://testnet.snowtrace.io/)
+[![Standard](https://img.shields.io/badge/Standard-EIP--5192_Soulbound-blue?style=for-the-badge)](https://eips.ethereum.org/EIPS/eip-5192)
+[![Solidity](https://img.shields.io/badge/Solidity-0.8.20-363636?style=for-the-badge&logo=solidity)](https://soliditylang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 ---
 
-## 📌 Problemática y Solución
+## 📌 Enlaces del Proyecto & Demostración
 
-El fraude de credenciales académicas y certificaciones profesionales genera pérdidas millonarias y ralentiza los procesos de contratación. Los diplomas digitales tradicionales en formato PDF son fácilmente adulterables mediante herramientas estándar de edición tipográfica.
+* 🌐 **Demo en Vivo (dApp):** [https://melek-eyzaguirre-dev.github.io/avalanCert-Dapps/](https://melek-eyzaguirre-dev.github.io/avalanCert-Dapps/)
+* 📦 **Repositorio GitHub:** [https://github.com/melek-eyzaguirre-dev/avalanCert-Dapps](https://github.com/melek-eyzaguirre-dev/avalanCert-Dapps)
+* 🎥 **Video Pitch / Demo (YouTube Short):** [Ver Video Demo en YouTube](https://youtube.com/shorts/zkkPRg0_SY4)
+* 📊 **Pitch Deck & Presentación Ejecutiva:** [Ver Presentación en Gamma App](https://gamma.app) *(reemplaza con tu URL específica de Gamma)*
+* 🔗 **Ecosystem Showcase:** [EduChain Project Hub](https://ecosystem-hub-test.up.railway.app/projects/educhain-78jj)
 
-**AvalanCert** aborda este desafío combinando la inmutabilidad de la blockchain con criptografía de clave pública:
-* **Tokens Intransferibles (EIP-5192):** Credenciales digitales acuñadas como Soulbound Tokens (SBTs) asociadas a la dirección del graduado, impidiendo transferencias secundarias o comercialización.
-* **Huella Criptográfica SHA-256:** Cada diploma emitido se vincula de manera determinista con su digest criptográfico on-chain. Cualquier alteración del contenido original rompe la correspondencia con la blockchain.
-* **Verificación Pública Zero-Wallet:** Evaluadores y empleadores pueden certificar la validez de un documento arrastrando el archivo PDF a la dApp o leyendo el código QR dinámico, sin interactuar con extensiones Web3 ni pagar gas.
-* **Homologación Web2 a Web3:** Soporte para vincular credenciales previas y enlaces institucionales (plataformas como Udemy, Coursera o portales universitarios) dentro del estándar SBT.
-* **Control de Acceso Institucional (RBAC):** Separación de permisos mediante `AccessControl` para rectorías y facultades, con capacidad de revocación on-chain ante faltas académicas.
+---
+
+## 💡 El Problema y la Solución AvalanCert
+
+### El Problema
+El fraude documental y la falsificación de credenciales académicas generan pérdidas millonarias y ralentizan las auditorías de contratación. Los diplomas digitales tradicionales (formatos PDF o imágenes estándar) son vulnerables a manipulación tipográfica mediante editores convencionales sin dejar rastro aparente.
+
+### La Solución AvalanCert
+AvalanCert establece un estándar infalsificable uniendo la inmutabilidad de la C-Chain de Avalanche con criptografía de clave pública:
+1. **Intransferibilidad Nativa (Soulbound EIP-5192):** Los certificados acuñados están ligados a la wallet del graduado de forma permanente. Las funciones de transferencia secundaria están anuladas por contrato.
+2. **Anclaje Criptográfico Híbrido (SHA-256 Digest):** Cada PDF generado posee una huella matemática SHA-256 almacenada on-chain. Si se adultera un solo píxel o letra del documento, el hash cambia y el validador rechaza el archivo.
+3. **Validación Zero-Wallet (Consenso Público):** Empleadores y reclutadores pueden validar documentos simplemente arrastrando el archivo PDF a la dApp o escaneando el código QR dinámico, sin extensiones Web3 ni pago de gas.
+4. **Homologación de Enlaces Externos (Web2 ➔ Web3):** Permite a las instituciones certificar enlaces preexistentes (como credenciales de Udemy, Coursera o portales universitarios) asegurando su autenticidad en la blockchain.
+5. **Gobernanza Institucional & Revocación Tombstone:** Sistema de control de acceso por roles (`DEFAULT_ADMIN_ROLE` y `ISSUER_ROLE`) con capacidad de revocación on-chain ante faltas académicas.
 
 ---
 
@@ -27,41 +39,41 @@ El fraude de credenciales académicas y certificaciones profesionales genera pé
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Emisor as Entidad Emisora (ISSUER_ROLE)
-    participant App as dApp AvalanCert (Cliente)
-    participant Chain as Avalanche C-Chain (AvalanCertSBT)
+    actor Emisor as Institución (ISSUER_ROLE)
+    participant dApp as AvalanCert Frontend (Cliente)
+    participant AVAX as Avalanche C-Chain (AvalanCertSBT)
     actor Alumno as Estudiante Titular
-    actor Verificador as Verificador / Empleador
+    actor Reclutador as Reclutador / Empresa
 
     %% Emisión
-    rect rgb(28, 20, 24)
-    Note over Emisor,Chain: Proceso de Emisión y Anclaje Criptográfico
-    Emisor->>App: Carga datos de acreditación (Formulario / Lote CSV / URL Externa)
-    App->>App: Genera estructura canónica del PDF y calcula SHA-256
-    Emisor->>Chain: Ejecuta issueCertificate(...) / issueBatch(...)
-    Chain->>Chain: Mintea SBT, almacena hash y emite evento Locked(tokenId)
-    Chain-->>App: Retorna confirmación de bloque y Token ID
-    App->>App: Inyecta código QR verificador dinámico
-    App-->>Alumno: Descarga del PDF oficial individual o archivo ZIP comprimido
+    rect rgb(30, 20, 24)
+    Note over Emisor,AVAX: Flujo de Emisión & Anclaje Criptográfico
+    Emisor->>dApp: Carga datos (Formulario / CSV Masivo / URL Externa)
+    dApp->>dApp: Computa digest criptográfico SHA-256 (Web Crypto API)
+    Emisor->>AVAX: Firma transacción (issueCertificate / issueBatch)
+    AVAX->>AVAX: Mintea SBT, almacena hash y emite evento Locked(tokenId)
+    AVAX-->>dApp: Confirma bloque y retorna Token ID
+    dApp->>dApp: Incrusta código QR verificador dinámico en el PDF
+    dApp-->>Alumno: Descarga del diploma oficial (.pdf o paquete .zip)
     end
 
-    %% Verificación
-    rect rgb(18, 28, 22)
-    Note over Verificador,Chain: Validación Pública On-Chain (Zero-Wallet)
-    Verificador->>App: Carga documento PDF (Drag & Drop) o ingresa Token ID
-    App->>App: Computa digest SHA-256 localmente (Web Crypto API)
-    App->>Chain: Consulta RPC getCertificate(tokenId)
-    Chain-->>App: Retorna hash on-chain, emisor, fecha, estado de revocación y URL
-    alt Hash Coincidente & Vigente
-        App-->>Verificador: Estado: VERIFICADO (Documento auténtico e inalterado)
+    %% Validación
+    rect rgb(18, 30, 24)
+    Note over Reclutador,AVAX: Verificación Pública Zero-Wallet (Drag & Drop)
+    Reclutador->>dApp: Arrastra el archivo PDF (o ingresa Token ID)
+    dApp->>dApp: Calcula SHA-256 en memoria local
+    dApp->>AVAX: Consulta RPC getCertificate(tokenId)
+    AVAX-->>dApp: Retorna {documentHash, issuer, revoked, owner, externalUrl}
+    alt Hash Coincidente y Vigente
+        dApp-->>Reclutador: Estado VERIFICADO (Documento íntegro y auténtico)
     else Hash Discrepante
-        App-->>Verificador: Estado: ADULTERADO (Contenido modificado)
-    else Estado Revocado
-        App-->>Verificador: Estado: REVOCADO (Credencial anulada por la institución)
+        dApp-->>Reclutador: Estado ADULTERADO (Documento manipulado)
+    else Token Revocado
+        dApp-->>Reclutador: Estado REVOCADO (Credencial anulada por la institución)
     end
     end
 graph TD
-    A[Rectoría / Super Admin] -->|DEFAULT_ADMIN_ROLE| B(Smart Contract AvalanCertSBT)
+    A[Super Admin / Rectoría] -->|DEFAULT_ADMIN_ROLE| B(Smart Contract AvalanCertSBT)
     A -->|grantRole / revokeRole| C[Facultades / Departamentos]
     C -->|ISSUER_ROLE| D[issueCertificate: Emisión Individual]
     C -->|ISSUER_ROLE| E[issueBatch: Emisión Masiva CSV]
@@ -72,4 +84,20 @@ graph TD
     F --> G
     
     G -.->|locked = true| H[Wallet Estudiante: EIP-5192 SBT]
-    G -.->|Tombstone Flag| I[Historial de Auditoría Pública]
+    G -.->|Tombstone Flag| I[Auditoría Pública en Tiempo Real]
+avalanCert-Dapps/
+├── contracts/
+│   ├── interfaces/
+│   │   └── IERC5192.sol            # Interfaz oficial EIP-5192 (Soulbound)
+│   └── AvalanCertSBT.sol           # Contrato principal (ERC721URIStorage + AccessControl)
+├── scripts/
+│   └── deploy.js                   # Script de despliegue y verificación en Snowtrace
+├── js/
+│   ├── avalancheConfig.js          # Constantes de red Fuji, ABI y dirección del contrato
+│   └── validator.js                # Lógica Web3, cálculo SHA-256, generador PDF/ZIP
+├── css/
+│   └── styles.css                  # Estilos visuales complementarios a Tailwind CSS
+├── index.html                      # Aplicación dApp unificada (Emisor, Alumno, Verificador, Admin)
+├── hardhat.config.js               # Configuración de compilador y redes Hardhat
+├── package.json                    # Dependencias y scripts de ejecución
+└── README.md                       # Documentación técnica del protocolo
